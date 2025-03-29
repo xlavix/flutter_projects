@@ -244,6 +244,3 @@ Jalankan aplikasi:
 flutter run
 ```
 
----
-
-🎯 **Demikian dokumentasi lengkap aplikasi Flutter dengan navigasi 3 halaman ini. Semoga bermanfaat!**
