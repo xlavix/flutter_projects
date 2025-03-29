@@ -1,122 +1,250 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo Baru',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Contoh Navigasi 3 Halaman',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: HomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
+
+  // Daftar halaman yang akan ditampilkan
+  final List<Widget> _pages = [
+    HalamanUtama(),
+    HalamanHariLibur(),
+    HalamanProfile(),
+  ];
+
+  final List<String> _titles = [
+    'Halaman Utama',
+    'Daftar Hari Libur Nasional',
+    'Profile',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_titles[_currentIndex]), // judul dinamis berdasarkan halaman aktif
+      ),
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.blue,
+        onTap: (int index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Utama'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: 'Hari Libur'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+}
+
+// Halaman Utama
+class HalamanUtama extends StatefulWidget {
+  const HalamanUtama({super.key});
+
+  @override
+  _HalamanUtamaState createState() => _HalamanUtamaState();
+}
+
+class _HalamanUtamaState extends State<HalamanUtama> {
   int _counter = 0;
 
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
+    });
+  }
+
+  void _decrementCounter() {
+    setState(() {
+      _counter--;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Jumlah angka sekarang:', style: TextStyle(fontSize: 18)),
+          Text('$_counter', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: _decrementCounter,
+                child: Icon(Icons.remove),
+              ),
+              SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: _incrementCounter,
+                child: Icon(Icons.add),
+              ),
+            ],
+          )
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+    );
+  }
+}
+
+
+// Halaman Hari Libur
+class HalamanHariLibur extends StatefulWidget {
+  const HalamanHariLibur({super.key});
+
+  @override
+  _HalamanHariLiburState createState() => _HalamanHariLiburState();
+}
+
+class _HalamanHariLiburState extends State<HalamanHariLibur> {
+  List hariLibur = [];
+  bool loading = true;
+
+  Future<void> fetchHariLibur() async {
+    setState(() {
+      loading = true;
+    });
+
+    final response = await http.get(Uri.parse('https://api-harilibur.vercel.app/api'));
+
+    if (response.statusCode == 200) {
+      List data = jsonDecode(response.body);
+
+      // Koreksi format tanggal sebelum sorting
+      data.sort((a, b) {
+        DateTime tanggalA = parseTanggal(a['holiday_date']);
+        DateTime tanggalB = parseTanggal(b['holiday_date']);
+        return tanggalA.compareTo(tanggalB);
+      });
+
+      setState(() {
+        hariLibur = data;
+        loading = false;
+      });
+    } else {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+// Fungsi tambahan untuk memperbaiki format tanggal
+  DateTime parseTanggal(String tanggal) {
+    final parts = tanggal.split('-');
+    final tahun = parts[0];
+    final bulan = parts[1].padLeft(2, '0');
+    final hari = parts[2].padLeft(2, '0');
+    return DateTime.parse('$tahun-$bulan-$hari');
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchHariLibur();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return loading
+        ? Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Text(
+            'Daftar Hari Libur Nasional Indonesia (${DateTime.now().year})',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          DataTable(
+            columns: [
+              DataColumn(label: Text('Tanggal')),
+              // DataColumn(label: Text('Hari')),
+              DataColumn(label: Text('Keterangan')),
+            ],
+            rows: hariLibur
+                .map((libur) => DataRow(cells: [
+              DataCell(Text(libur['holiday_date'] ?? '')),
+              // DataCell(Text(libur['day_name'] ?? '')),
+              DataCell(Text(libur['holiday_name'] ?? '')),
+            ]))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Halaman Profile (menggantikan halaman dua)
+class HalamanProfile extends StatelessWidget {
+  const HalamanProfile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12), // Rounded corner
+              child: SizedBox(
+                width: 120,    // lebar 3
+                height: 160,   // tinggi 4 (rasio 3:4)
+                child: Image.asset(
+                  'assets/images/avatar.jpeg', // Pastikan nama file sama persis
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 20),
+          Text('Nama:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text('Didik Soecipto', style: TextStyle(fontSize: 18)),
+          SizedBox(height: 10),
+          Text('Tempat, Tanggal Lahir:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text('Jakarta, 24 Februari 1990', style: TextStyle(fontSize: 18)),
+          SizedBox(height: 10),
+          Text('Alamat:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text('Jl. Sudirman No. 123, Jakarta', style: TextStyle(fontSize: 18)),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
