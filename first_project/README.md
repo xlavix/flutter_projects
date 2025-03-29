@@ -1,7 +1,3 @@
-Berikut dokumentasi lengkap tentang aplikasi Flutter 3 halaman dalam format **Markdown** yang siap untuk di-copy paste:
-
----
-
 # 📘 Dokumentasi Aplikasi Flutter: Navigasi 3 Halaman
 
 Aplikasi ini dibuat dengan menggunakan Flutter dan Dart yang terdiri dari **3 halaman utama** dengan navigasi melalui BottomNavigationBar:
