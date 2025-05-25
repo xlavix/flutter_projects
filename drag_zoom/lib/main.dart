@@ -71,7 +71,6 @@ class _DraggableZoomableWidgetState extends State<DraggableZoomableWidget> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     // AppBar diperlukan untuk mendapatkan tinggi yang benar saat menghitung posisi tengah
