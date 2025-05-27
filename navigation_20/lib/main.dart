@@ -8,8 +8,9 @@ void main() {
 class Item {
   final int id;
   final String name;
+  final int stock;
 
-  Item({required this.id, required this.name});
+  Item({required this.id, required this.name, required this.stock});
 }
 
 // Aplikasi utama
@@ -26,9 +27,9 @@ class _MyAppState extends State<MyApp> {
 
   // Daftar item contoh
   final List<Item> _items = [
-    Item(id: 1, name: 'Item 1'),
-    Item(id: 2, name: 'Item 2'),
-    Item(id: 3, name: 'Item 3'),
+    Item(id: 1, name: 'Item 1', stock: 5),
+    Item(id: 2, name: 'Item 2', stock: 5),
+    Item(id: 3, name: 'Item 3', stock: 5),
   ];
 
   // Fungsi untuk menangani pemilihan item
@@ -151,6 +152,10 @@ class DetailScreen extends StatelessWidget {
             ),
             Text(
               'ID: ${item.id}',
+              style: const TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Stock: ${item.stock} pcs',
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),

@@ -28,6 +28,10 @@ class AppRouteInformationParser extends RouteInformationParser<RoutePath> {
       }
     }
 
+    if (uri.pathSegments.length == 1 && uri.pathSegments[0] == 'settings') {
+        return RoutePath.settings();
+    }
+
     // Kembali ke home jika rute tidak dikenali
     return RoutePath.home();
   }
@@ -40,6 +44,9 @@ class AppRouteInformationParser extends RouteInformationParser<RoutePath> {
     if (path.isDetail) {
       return RouteInformation(uri: Uri.parse('/detail/${path.id}'));
     }
+    if (path.isSettings) {
+      return RouteInformation(uri: Uri.parse('/settings'));
+    }
     return RouteInformation(uri: Uri.parse('/'));
   }
 }
@@ -47,15 +54,24 @@ class AppRouteInformationParser extends RouteInformationParser<RoutePath> {
 // Kelas untuk konfigurasi rute
 class RoutePath {
   final bool isHome;
+  final bool isSettings;
   final int? id;
 
   RoutePath.home()
       : isHome = true,
+        isSettings = false,
         id = null;
 
-  RoutePath.detail(this.id) : isHome = false;
+  RoutePath.detail(this.id)
+      : isHome = false,
+        isSettings = false;
 
-  bool get isDetail => !isHome;
+  RoutePath.settings()
+      : isSettings = true,
+        isHome = false,
+        id = null;
+
+  bool get isDetail => !isHome && !isSettings;
 }
 
 // Kelas untuk router delegate
@@ -65,6 +81,7 @@ class AppRouterDelegate extends RouterDelegate<RoutePath>
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   int? _selectedItemId;
+  bool _showSettings = false;
   final List<Item> _items = [
     Item(id: 1, name: 'Item 1'),
     Item(id: 2, name: 'Item 2'),
@@ -74,11 +91,19 @@ class AppRouterDelegate extends RouterDelegate<RoutePath>
   // Mengatur item yang dipilih
   void selectItem(int id) {
     _selectedItemId = id;
+    _showSettings = false;
     notifyListeners();
   }
 
   // Kembali ke home
   void goHome() {
+    _selectedItemId = null;
+    _showSettings = false;
+    notifyListeners();
+  }
+
+  void goToSettings() {
+    _showSettings = true;
     _selectedItemId = null;
     notifyListeners();
   }
@@ -87,6 +112,9 @@ class AppRouterDelegate extends RouterDelegate<RoutePath>
   RoutePath get currentConfiguration {
     if (_selectedItemId == null) {
       return RoutePath.home();
+    }
+    if (_showSettings) {
+      return RoutePath.settings();
     }
     return RoutePath.detail(_selectedItemId);
   }
@@ -102,6 +130,7 @@ class AppRouterDelegate extends RouterDelegate<RoutePath>
           child: HomeScreen(
             items: _items,
             onItemSelected: selectItem,
+            onGoToSettings: goToSettings,
           ),
         ),
         // Tampilkan DetailScreen jika ada item yang dipilih
@@ -113,11 +142,28 @@ class AppRouterDelegate extends RouterDelegate<RoutePath>
               onBack: goHome,
             ),
           ),
+        if (_showSettings)
+          MaterialPage(
+            key: const ValueKey('SettingsScreen'),
+            child: SettingsScreen(
+              onBack: goHome,
+            ),
+          ),
       ],
       onPopPage: (route, result) {
         if (!route.didPop(result)) return false;
-        goHome();
-        return true;
+
+        if (route.key == const ValueKey('SettingsScreen')) {
+          goHome();
+          return true;
+        }
+
+        if (route.key == ValueKey('DetailScreen-$_selectedItemId')) {
+          goHome();
+          return true;
+        }
+
+        return false;
       },
     );
   }
@@ -126,10 +172,19 @@ class AppRouterDelegate extends RouterDelegate<RoutePath>
   Future<void> setNewRoutePath(RoutePath path) async {
     if (path.isHome) {
       _selectedItemId = null;
+      _showSettings = false;
     } else if (path.isDetail && path.id != null) {
       _selectedItemId = path.id;
+      _showSettings = false;
+    } else if (path.isSettings) {
+      _selectedItemId = null;
+      _showSettings = true;
     }
   }
+}
+
+extension on Route {
+  get key => null;
 }
 
 // Aplikasi utama
@@ -161,11 +216,13 @@ class MyApp extends StatelessWidget {
 class HomeScreen extends StatelessWidget {
   final List<Item> items;
   final Function(int) onItemSelected;
+  final VoidCallback onGoToSettings;
 
   const HomeScreen({
     super.key,
     required this.items,
     required this.onItemSelected,
+    required this.onGoToSettings,
   });
 
   @override
@@ -186,6 +243,11 @@ class HomeScreen extends StatelessWidget {
             trailing: const Icon(Icons.arrow_forward),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: onGoToSettings,
+        tooltip: 'Settings',
+        child: const Icon(Icons.settings),
       ),
     );
   }
@@ -220,6 +282,46 @@ class DetailScreen extends StatelessWidget {
             Text(
               'ID: ${item.id}',
               style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: onBack,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+              child: const Text('Back to Home'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Layar Pengaturan (SettingsScreen)
+class SettingsScreen extends StatelessWidget {
+  final VoidCallback onBack;
+
+  const SettingsScreen({
+    super.key,
+    required this.onBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'This is Settings Page.',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             ElevatedButton(

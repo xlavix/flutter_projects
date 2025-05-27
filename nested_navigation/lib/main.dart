@@ -80,6 +80,10 @@ class _SetupFlowScreenState extends State<SetupFlowScreen> {
     _navigatorKey.currentState!.pushNamed('connect_device');
   }
 
+  void _onConfirmDevice() {
+    _navigatorKey.currentState!.pushNamed('confirm_device');
+  }
+
   // Fungsi untuk menyelesaikan alur pengaturan
   void _completeSetup(BuildContext context) {
     Navigator.pop(context); // Kembali ke HomeScreen
@@ -107,7 +111,10 @@ class _SetupFlowScreenState extends State<SetupFlowScreen> {
               page = FindDevicesScreen(onDeviceFound: _onDeviceFound);
               break;
             case 'connect_device':
-              page = ConnectDeviceScreen(onSetupComplete: () => _completeSetup(context));
+              page = ConnectDeviceScreen(onConfirmDevice: _onConfirmDevice);
+              break;
+            case 'confirm_device':
+              page = ConfirmDevice(onSetupComplete: () => _completeSetup(context));
               break;
             default:
               page = FindDevicesScreen(onDeviceFound: _onDeviceFound);
@@ -152,9 +159,9 @@ class FindDevicesScreen extends StatelessWidget {
 
 // Layar Koneksi Perangkat (ConnectDeviceScreen)
 class ConnectDeviceScreen extends StatelessWidget {
-  final VoidCallback onSetupComplete;
+  final VoidCallback onConfirmDevice;
 
-  const ConnectDeviceScreen({super.key, required this.onSetupComplete});
+  const ConnectDeviceScreen({super.key, required this.onConfirmDevice});
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +171,47 @@ class ConnectDeviceScreen extends StatelessWidget {
         children: [
           const Text(
             'Connecting to Device...',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: onConfirmDevice,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              textStyle: const TextStyle(fontSize: 16),
+            ),
+            child: const Text('Confirm Device'),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Kembali ke FindDevicesScreen
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              textStyle: const TextStyle(fontSize: 16),
+            ),
+            child: const Text('Back'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ConfirmDevice extends StatelessWidget {
+  final VoidCallback onSetupComplete;
+
+  const ConfirmDevice({super.key, required this.onSetupComplete});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Device Confirmed',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
